@@ -1,0 +1,57 @@
+services:
+  mongo-dev:
+    image: mongo:7
+    container_name: multienv-mongo-dev
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-dev-data:/data/db
+
+  mongo-prod:
+    image: mongo:7
+    container_name: multienv-mongo-prod
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo-prod-data:/data/db
+
+  backend-dev:
+    build:
+      context: ./backend/dev
+      dockerfile: Dockerfile
+    container_name: multienv-backend-dev
+    depends_on:
+      - mongo-dev
+    environment:
+      MONGO_URI: mongodb://mongo-dev:27017/brm-dev
+    ports:
+      - "3001:3001"
+
+  backend-prod:
+    build:
+      context: ./backend/prod
+      dockerfile: Dockerfile
+    container_name: multienv-backend-prod
+    depends_on:
+      - mongo-prod
+    environment:
+      MONGO_URI: mongodb://mongo-prod:27017/brm-prod
+    ports:
+      - "3002:3002"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: multienv-frontend
+    depends_on:
+      - backend-dev
+      - backend-prod
+    ports:
+      - "3000:3000"
+    stdin_open: true
+    tty: true
+
+volumes:
+  mongo-dev-data:
+  mongo-prod-data:
