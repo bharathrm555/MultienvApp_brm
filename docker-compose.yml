@@ -48,7 +48,7 @@ services:
       - backend-dev
       - backend-prod
     ports:
-      - "3000:3000"
+      - "${FRONTEND_PORT:-3000}:3000"
     stdin_open: true
     tty: true
 
